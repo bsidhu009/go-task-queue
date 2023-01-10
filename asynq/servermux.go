@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/bsidhu009/go-task-queue/async/task"
+
 )
 
 type ServeMux struct {
@@ -16,14 +19,14 @@ type ServeMux struct {
 
 // ProcessTask dispatches the task to the handler whose
 // pattern most closely matches the task type.
-func (mux *ServeMux) ProcessTask(ctx context.Context, task *Task) error {
+func (mux *ServeMux) ProcessTask(ctx context.Context, task *task.Task) error {
 	h, _ := mux.Handler(task)
 	return h.ProcessTask(ctx, task)
 }
 
 // Handler If there is no registered handler that applies to the task,
 // handler returns a 'not found' handler which returns an error.
-func (mux *ServeMux) Handler(t *Task) (h Handler, pattern string) {
+func (mux *ServeMux) Handler(t *task.Task) (h Handler, pattern string) {
 	mux.mu.RLock()
 	defer mux.mu.RUnlock()
 
@@ -79,7 +82,7 @@ func (mux *ServeMux) Handle(pattern string, handler Handler) {
 }
 
 // NotFound returns an error indicating that the handler was not found for the given task.
-func NotFound(ctx context.Context, task *Task) error {
+func NotFound(ctx context.Context, task *task.Task) error {
 	return fmt.Errorf("handler not found for task %q", task.Type())
 }
 

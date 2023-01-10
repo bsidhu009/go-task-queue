@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bsidhu009/go-task-queue/log"
 	"sync"
+
+	"github.com/bsidhu009/go-task-queue/async/task"
+	"github.com/bsidhu009/go-task-queue/log"
 )
 
 type Processor struct {
@@ -33,7 +35,7 @@ func NewProcessor(params ProcessorParams) *Processor {
 		done:    make(chan struct{}),
 		quit:    make(chan struct{}),
 		abort:   make(chan struct{}),
-		handler: HandlerFunc(func(ctx context.Context, t *Task) error { return fmt.Errorf("handler not set") }),
+		handler: HandlerFunc(func(ctx context.Context, t *task.Task) error { return fmt.Errorf("handler not set") }),
 	}
 }
 
@@ -79,7 +81,7 @@ func (p *Processor) exec() {
 	}
 
 	go func() {
-		task := NewTask(
+		task := task.NewTask(
 			msg.Type,
 			msg.Payload,
 		)
@@ -87,7 +89,7 @@ func (p *Processor) exec() {
 	}()
 }
 
-func (p *Processor) perform(ctx context.Context, task *Task) (err error) {
+func (p *Processor) perform(ctx context.Context, task *task.Task) (err error) {
 	return p.handler.ProcessTask(ctx, task)
 }
 

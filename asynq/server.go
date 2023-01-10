@@ -3,6 +3,7 @@ package asynq
 import (
 	"context"
 	"fmt"
+	"github.com/bsidhu009/go-task-queue/async/task"
 	"github.com/bsidhu009/go-task-queue/log"
 	"sync"
 )
@@ -37,13 +38,13 @@ type Config struct {
 }
 
 type Handler interface {
-	ProcessTask(context.Context, *Task) error
+	ProcessTask(context.Context, *task.Task) error
 }
 
-type HandlerFunc func(context.Context, *Task) error
+type HandlerFunc func(context.Context, *task.Task) error
 
 // ProcessTask calls fn(ctx, task)
-func (fn HandlerFunc) ProcessTask(ctx context.Context, task *Task) error {
+func (fn HandlerFunc) ProcessTask(ctx context.Context, task *task.Task) error {
 	return fn(ctx, task)
 }
 

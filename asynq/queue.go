@@ -1,6 +1,10 @@
 package asynq
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/bsidhu009/go-task-queue/async/task"
+)
 
 type TaskQueue struct {
 }
@@ -9,7 +13,7 @@ func NewTaskQueue() *TaskQueue {
 	return &TaskQueue{}
 }
 
-func (q *TaskQueue) NewTask(taskType string, payload Task) {
+func (q *TaskQueue) NewTask(taskType string, payload task.Task) {
 	fmt.Printf("task added queue %+v\n", payload)
 }
 

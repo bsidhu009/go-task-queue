@@ -1,4 +1,4 @@
-package asynq
+package task
 
 // TypeImageResize A list of task types.
 const (
