@@ -1,0 +1,53 @@
+Asynchronous Task Queue Design Document
+
+This document describes the design of an asynchronous task queue service with the following functionality:
+
+A client should be able to connect to the task queue service and make task create/abort/status requests.
+
+The task create request consists of the task type (e.g. imageResize) and the payload (raw bytes/json etc.).
+When this request is processed successfully, a unique task id is returned to the caller.
+
+The client can request to abort a previously created task. This request consists of the previously returned task id.
+
+The client can request the status of an individual task by providing its task id.
+
+In addition, it should be possible to monitor queued and running tasks etc.
+
+
+COMPONENTS
+
+1. A request server that serves API endpoints for serving task create/abort/status requests.
+
+2. A task queue processor that maintains the task queue and the task worker pool.
+
+3. The task queue is an ordered list of tasks (with the ability to remove tasks).
+
+4. A task consists of the task request parameters, a unique task id and a run function corresponding to the task type.
+
+5. The task worker pool is a set of goroutines that can execute (the run function of) one task at a time.
+
+
+OPERATION
+
+1. A task request is received by the request server.
+
+2. The request server extracts the task type and task payload from the request data (e.g. GET/PUT)
+
+3. The request server calls the AddTask method of the task queue processor to create a new task using the task parameters.
+It receives the task id and returns it to the requestor.
+
+4. The add task method of the queue processor creates a task instance with a new unique id, using the task request parameters, and the run function corresponding to
+the task type.
+
+5. If the task queue is empty and a task worker is available, queue processor dispatches the task to the worker and adds it to the running tasks collection. Otherwise, the task
+is enqueued onto the task queue.
+
+6. A task worker blocks until a task is assigned to it. It then executes the run function of the task. When the run function completes, the task worker blocks once again.
+
+7. WHen the task is complete, the task worker signals the queue processor and resumes blocking.
+
+8. When the queue processor receives the task completion signal from the worker, it removes the task from the running task collection.
+If the task queue is not empty, it moves the task at the front of the queue to the running tasks collection and dispatches it to the worker pool.
+
+9. Preemption: When a request is received to abort a running task, the queue processor signals the task using a dedicated channel. The run function of the task is expected
+to poll this channel during execution, terminate (return to the task worker).
