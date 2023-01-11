@@ -11,6 +11,8 @@ import (
 )
 
 type Processor struct {
+	mu sync.Mutex
+
 	logger  *log.Logger
 	handler Handler
 	// channel to communicate back to the long-running "processor" goroutine.
@@ -22,6 +24,9 @@ type Processor struct {
 
 	// abort channel communicates to the in-flight worker goroutines to stop.
 	abort chan struct{}
+
+	waitingTasks queue.Queue
+	runningTasks queue.Queue
 }
 
 type ProcessorParams struct {
@@ -94,3 +99,7 @@ func (p *Processor) perform(ctx context.Context, task *task.Task) (err error) {
 }
 
 var SkipRetry = errors.New("skip retry for the task")
+
+func (p *Processor) AddTask(task *task.Task, ctx context.Context) {
+	p.waitingTasks.Add(task, ctx)
+}

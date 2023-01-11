@@ -73,22 +73,11 @@ func NewServer(cfg Config) *Server {
 }
 
 func (srv *Server) Run(handler Handler) error {
-	if err := srv.Start(handler); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (srv *Server) Start(handler Handler) error {
 	if handler == nil {
 		return fmt.Errorf("asynq: server cannot run with nil handler")
 	}
 
 	srv.processor.handler = handler
-
-	if err := srv.start(); err != nil {
-		return err
-	}
 
 	//srv.logger.Info("Starting processing")
 	srv.processor.start(&srv.wg)
@@ -96,6 +85,6 @@ func (srv *Server) Start(handler Handler) error {
 	return nil
 }
 
-func (srv *Server) start() error {
-	return nil
+func (srv *Server) AddTask(task *task.Task, ctx context.Context) error {
+	return processor.AddTask(task, ctx)
 }

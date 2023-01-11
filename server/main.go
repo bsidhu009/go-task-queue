@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/bsidhu009/go-task-queue/asynq"
@@ -27,19 +28,26 @@ func main() {
 		log.Fatalf("could not run server: %v", err)
 	}
 
+	// Read saved tasks and enqueue them on server
+	// FIXME
+
 	// Instantiate fiber routes.
 	app := fiber.New()
 
 	app.Get("/add-new-task", func(c *fiber.Ctx) error {
 		task := task.Task{ /* PAYLOAD */ }
-		taskid := srv.AddTask(task)
+		ctx = context.Background()
+		// FIXME: populate ctx with necessary fields
+		taskid := srv.AddTask(task, ctx)
 		// FIXME: return taskid or error.
 		return nil
 	})
 
 	app.Get("/task-abort", func(c *fiber.Ctx) error {
 		taskid = FIXME // FIXME: get task id from request
-		srv.AbortTask(taskid)
+		ctx = context.Background()
+		// FIXME: populate ctx with necessary fields
+		srv.AbortTask(taskid, ctx)
 		return nil
 	})
 
